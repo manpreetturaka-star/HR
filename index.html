@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haryana Districts Explorer - Famous Places</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+    
+    .heading-font {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .hero-gradient {
+      background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #2b6cb0 100%);
+    }
+    
+    .card-gradient {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(249,250,251,1) 100%);
+    }
+    
+    .district-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .district-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .image-container {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+      aspect-ratio: 16 / 9;
+    }
+    
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .district-card:hover .image-container img {
+      transform: scale(1.05);
+    }
+    
+    .nav-link {
+      position: relative;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #f6ad55;
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    .stagger-4 { animation-delay: 0.4s; }
+    
+    .pulse-glow {
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(246, 173, 85, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(246, 173, 85, 0.8); }
+    }
+    
+    .pattern-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .map-container {
+      background: linear-gradient(145deg, #e8f4f8 0%, #d4e8ed 100%);
+      border-radius: 20px;
+    }
+    
+    .stat-card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .scroll-smooth {
+      scroll-behavior: smooth;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .place-card {
+      overflow: hidden;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .place-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .place-image {
+      width: 100%;
+      height: 250px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .place-card:hover .place-image {
+      transform: scale(1.08);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.5));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .place-card:hover .image-overlay {
+      opacity: 1;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-slate-50 scroll-smooth overflow-auto">
+  <div id="app-wrapper" class="w-full h-full"><!-- Navigation -->
+   <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background: rgba(26, 54, 93, 0.95); backdrop-filter: blur(10px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #f6ad55;"><span class="text-xl">🏛️</span>
+       </div><span id="nav-title" class="heading-font text-xl font-semibold text-white">Haryana Explorer</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8"><a href="#home" class="nav-link text-white/90 hover:text-white transition-colors">Home</a> <a href="#districts" class="nav-link text-white/90 hover:text-white transition-colors">Districts</a> <a href="#places" class="nav-link text-white/90 hover:text-white transition-colors">Famous Places</a> <a href="#stats" class="nav-link text-white/90 hover:text-white transition-colors">Statistics</a> <a href="#culture" class="nav-link text-white/90 hover:text-white transition-colors">Culture</a>
+      </div><button id="mobile-menu-btn" class="md:hidden text-white p-2">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+       </svg></button>
+     </div>
+    </div><!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-white/10">
+     <div class="px-4 py-3 space-y-2"><a href="#home" class="block py-2 text-white/90 hover:text-white">Home</a> <a href="#districts" class="block py-2 text-white/90 hover:text-white">Districts</a> <a href="#places" class="block py-2 text-white/90 hover:text-white">Famous Places</a> <a href="#stats" class="block py-2 text-white/90 hover:text-white">Statistics</a> <a href="#culture" class="block py-2 text-white/90 hover:text-white">Culture</a>
+     </div>
+    </div>
+   </nav><!-- Hero Section -->
+   <section id="home" class="hero-gradient pattern-bg relative overflow-hidden" style="padding-top: 64px;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+     <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="text-white fade-in">
+       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-6"><span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span> <span class="text-sm text-white/90">Explore 23 Districts &amp; Famous Places</span>
+       </div>
+       <h1 id="hero-title" class="heading-font text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">Discover the Heart of <span style="color: #f6ad55;">Haryana</span></h1>
+       <p id="hero-subtitle" class="text-lg sm:text-xl text-white/80 mb-8 max-w-xl">Explore stunning landmarks, vibrant culture, and the progressive spirit of India's prosperous northern state with breathtaking photographs.</p>
+       <div class="flex flex-wrap gap-4"><a href="#districts" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 pulse-glow" style="background: #f6ad55; color: #1a365d;"> Explore Districts 
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+         </svg></a> <a href="#places" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium border-2 border-white/30 text-white hover:bg-white/10 transition-all"> Famous Places </a>
+       </div>
+      </div>
+      <div class="relative fade-in stagger-2">
+       <div class="map-container p-6 sm:p-8 shadow-2xl">
+        <svg viewbox="0 0 400 350" class="w-full h-auto"><defs>
+          <lineargradient id="mapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+           <stop offset="0%" style="stop-color:#2c5282;stop-opacity:1" />
+           <stop offset="100%" style="stop-color:#1a365d;stop-opacity:1" />
+          </lineargradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+           <fedropshadow dx="2" dy="4" stddeviation="4" flood-opacity="0.3" />
+          </filter>
+         </defs> <path d="M200,30 L280,50 L320,100 L350,150 L340,200 L300,250 L250,300 L180,320 L120,300 L80,250 L50,180 L60,120 L100,70 L150,40 Z" fill="url(#mapGrad)" filter="url(#shadow)" stroke="#f6ad55" stroke-width="3" /> <circle cx="200" cy="150" r="8" fill="#f6ad55" class="animate-pulse" /> <circle cx="150" cy="180" r="6" fill="#fff" opacity="0.8" /> <circle cx="250" cy="170" r="6" fill="#fff" opacity="0.8" /> <circle cx="180" cy="220" r="6" fill="#fff" opacity="0.8" /> <circle cx="220" cy="250" r="6" fill="#fff" opacity="0.8" /> <circle cx="130" cy="140" r="6" fill="#fff" opacity="0.8" /> <circle cx="270" cy="120" r="6" fill="#fff" opacity="0.8" /> <circle cx="160" cy="100" r="6" fill="#fff" opacity="0.8" /> <circle cx="200" cy="150" r="12" fill="none" stroke="#f6ad55" stroke-width="2" opacity="0.5">
+          <animate attributename="r" values="12;18;12" dur="2s" repeatcount="indefinite" />
+          <animate attributename="opacity" values="0.5;0.2;0.5" dur="2s" repeatcount="indefinite" />
+         </circle> <text x="200" y="135" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">
+          Chandigarh
+         </text>
+        </svg>
+       </div>
+       <div class="absolute -bottom-4 -left-4 stat-card rounded-xl p-4 shadow-lg fade-in stagger-3">
+        <div class="flex items-center gap-3">
+         <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #f6ad55, #ed8936);"><span class="text-2xl">📍</span>
+         </div>
+         <div>
+          <div class="text-2xl font-bold" style="color: #1a365d;">
+           22
+          </div>
+          <div class="text-sm text-slate-500">
+           Districts
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="absolute -top-4 -right-4 stat-card rounded-xl p-4 shadow-lg fade-in stagger-4">
+        <div class="flex items-center gap-3">
+         <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #48bb78, #38a169);"><span class="text-2xl">📸</span>
+         </div>
+         <div>
+          <div class="text-2xl font-bold" style="color: #1a365d;">
+           50+
+          </div>
+          <div class="text-sm text-slate-500">
+           Famous Places
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0">
+     <svg viewbox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z" fill="#f8fafc" />
+     </svg>
+    </div>
+   </section><!-- Districts Section -->
+   <section id="districts" class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full text-sm font-medium mb-4" style="background: #fef3c7; color: #92400e;"> Explore All Regions </span>
+      <h2 class="heading-font text-3xl sm:text-4xl font-bold mb-4" style="color: #1a365d;">Districts of Haryana</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">Each district has its unique identity, history, and famous landmarks</p>
+     </div><!-- Search and Filter -->
+     <div class="flex flex-col sm:flex-row gap-4 mb-10 justify-center">
+      <div class="relative"><input type="text" id="search-input" placeholder="Search districts..." class="w-full sm:w-80 px-5 py-3 pl-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+       <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+       </svg>
+      </div><select id="division-filter" class="px-5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all bg-white"> <option value="all">All Divisions</option> <option value="ambala">Ambala Division</option> <option value="rohtak">Rohtak Division</option> <option value="gurgaon">Gurgaon Division</option> <option value="hisar">Hisar Division</option> </select>
+     </div><!-- Districts Grid with Images -->
+     <div id="districts-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"><!-- Districts will be populated by JavaScript -->
+     </div>
+    </div>
+   </section><!-- Famous Places Section -->
+   <section id="places" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full text-sm font-medium mb-4" style="background: #fef3c7; color: #92400e;"> Iconic Landmarks </span>
+      <h2 class="heading-font text-3xl sm:text-4xl font-bold mb-4" style="color: #1a365d;">Famous Places in Haryana</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">Explore stunning monuments, temples, and natural wonders across the state</p>
+     </div>
+     <div id="places-grid" class="gallery-grid"><!-- Places will be populated by JavaScript -->
+     </div>
+    </div>
+   </section><!-- Statistics Section -->
+   <section id="stats" class="py-20" style="background: linear-gradient(180deg, #1a365d 0%, #2c5282 100%);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full text-sm font-medium mb-4" style="background: rgba(246, 173, 85, 0.2); color: #f6ad55;"> Facts &amp; Figures </span>
+      <h2 class="heading-font text-3xl sm:text-4xl font-bold text-white mb-4">Haryana at a Glance</h2>
+      <p class="text-white/70 max-w-2xl mx-auto">Key statistics showcasing the state's progress</p>
+     </div>
+     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/15 transition-all">
+       <div class="w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-4" style="background: linear-gradient(135deg, #f6ad55, #ed8936);"><span class="text-3xl">🗺️</span>
+       </div>
+       <div class="text-4xl font-bold text-white mb-2">
+        44,212
+       </div>
+       <div class="text-white/70">
+        Area (sq km)
+       </div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/15 transition-all">
+       <div class="w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-4" style="background: linear-gradient(135deg, #68d391, #48bb78);"><span class="text-3xl">👥</span>
+       </div>
+       <div class="text-4xl font-bold text-white mb-2">
+        2.8 Cr
+       </div>
+       <div class="text-white/70">
+        Population
+       </div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/15 transition-all">
+       <div class="w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-4" style="background: linear-gradient(135deg, #63b3ed, #4299e1);"><span class="text-3xl">📚</span>
+       </div>
+       <div class="text-4xl font-bold text-white mb-2">
+        82.4%
+       </div>
+       <div class="text-white/70">
+        Literacy Rate
+       </div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/15 transition-all">
+       <div class="w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-4" style="background: linear-gradient(135deg, #f687b3, #ed64a6);"><span class="text-3xl">🏘️</span>
+       </div>
+       <div class="text-4xl font-bold text-white mb-2">
+        6,841
+       </div>
+       <div class="text-white/70">
+        Villages
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Culture Section -->
+   <section id="culture" class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full text-sm font-medium mb-4" style="background: #fef3c7; color: #92400e;"> Rich Heritage </span>
+      <h2 class="heading-font text-3xl sm:text-4xl font-bold mb-4" style="color: #1a365d;">Culture &amp; Heritage</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">Discover the vibrant traditions that make Haryana unique</p>
+     </div>
+     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="group relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+       <div class="p-8">
+        <div class="text-6xl mb-4">
+         💃
+        </div>
+        <h3 class="heading-font text-2xl font-bold mb-3" style="color: #1a365d;">Folk Dances</h3>
+        <p class="text-slate-700 mb-4">Experience energetic Ghoomar and vibrant Dhamal dances.</p>
+        <ul class="space-y-2 text-sm text-slate-600">
+         <li class="flex items-center gap-2"><span style="color: #f6ad55;">●</span> Ghoomar</li>
+         <li class="flex items-center gap-2"><span style="color: #f6ad55;">●</span> Dhamal</li>
+         <li class="flex items-center gap-2"><span style="color: #f6ad55;">●</span> Phag Dance</li>
+        </ul>
+       </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+       <div class="p-8">
+        <div class="text-6xl mb-4">
+         🍽️
+        </div>
+        <h3 class="heading-font text-2xl font-bold mb-3" style="color: #1a365d;">Cuisine</h3>
+        <p class="text-slate-700 mb-4">Savor authentic Haryanvi dishes with rich flavors.</p>
+        <ul class="space-y-2 text-sm text-slate-600">
+         <li class="flex items-center gap-2"><span style="color: #48bb78;">●</span> Bajra Roti</li>
+         <li class="flex items-center gap-2"><span style="color: #48bb78;">●</span> Kadhi Pakora</li>
+         <li class="flex items-center gap-2"><span style="color: #48bb78;">●</span> Lassi</li>
+        </ul>
+       </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+       <div class="p-8">
+        <div class="text-6xl mb-4">
+         🎉
+        </div>
+        <h3 class="heading-font text-2xl font-bold mb-3" style="color: #1a365d;">Festivals</h3>
+        <p class="text-slate-700 mb-4">Celebrate colorful festivals with community spirit.</p>
+        <ul class="space-y-2 text-sm text-slate-600">
+         <li class="flex items-center gap-2"><span style="color: #3b82f6;">●</span> Teej</li>
+         <li class="flex items-center gap-2"><span style="color: #3b82f6;">●</span> Baisakhi</li>
+         <li class="flex items-center gap-2"><span style="color: #3b82f6;">●</span> Lohri</li>
+        </ul>
+       </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+       <div class="p-8">
+        <div class="text-6xl mb-4">
+         🤼
+        </div>
+        <h3 class="heading-font text-2xl font-bold mb-3" style="color: #1a365d;">Sports</h3>
+        <p class="text-slate-700 mb-4">Home to wrestling legends and Olympic champions.</p>
+        <ul class="space-y-2 text-sm text-slate-600">
+         <li class="flex items-center gap-2"><span style="color: #ec4899;">●</span> Wrestling</li>
+         <li class="flex items-center gap-2"><span style="color: #ec4899;">●</span> Kabaddi</li>
+         <li class="flex items-center gap-2"><span style="color: #ec4899;">●</span> Boxing</li>
+        </ul>
+       </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+       <div class="p-8">
+        <div class="text-6xl mb-4">
+         🧵
+        </div>
+        <h3 class="heading-font text-2xl font-bold mb-3" style="color: #1a365d;">Handicrafts</h3>
+        <p class="text-slate-700 mb-4">Exquisite Phulkari embroidery and traditional crafts.</p>
+        <ul class="space-y-2 text-sm text-slate-600">
+         <li class="flex items-center gap-2"><span style="color: #6366f1;">●</span> Phulkari</li>
+         <li class="flex items-center gap-2"><span style="color: #6366f1;">●</span> Pottery</li>
+         <li class="flex items-center gap-2"><span style="color: #6366f1;">●</span> Brass Work</li>
+        </ul>
+       </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);">
+       <div class="p-8">
+        <div class="text-6xl mb-4">
+         🎵
+        </div>
+        <h3 class="heading-font text-2xl font-bold mb-3" style="color: #1a365d;">Folk Music</h3>
+        <p class="text-slate-700 mb-4">Soulful Ragini and Saang performances.</p>
+        <ul class="space-y-2 text-sm text-slate-600">
+         <li class="flex items-center gap-2"><span style="color: #eab308;">●</span> Ragini</li>
+         <li class="flex items-center gap-2"><span style="color: #eab308;">●</span> Saang</li>
+         <li class="flex items-center gap-2"><span style="color: #eab308;">●</span> Alha</li>
+        </ul>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Footer -->
+   <footer style="background: #0f172a;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+     <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div class="md:col-span-2">
+       <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #f6ad55;"><span class="text-xl">🏛️</span>
+        </div><span class="heading-font text-xl font-semibold text-white">Haryana Explorer</span>
+       </div>
+       <p id="footer-text" class="text-slate-400 mb-4 max-w-md">Discover the beauty, culture, and progress of Haryana through stunning photographs and detailed information.</p>
+      </div>
+      <div>
+       <h4 class="font-semibold text-white mb-4">Quick Links</h4>
+       <ul class="space-y-2">
+        <li><a href="#home" class="text-slate-400 hover:text-white transition-colors">Home</a></li>
+        <li><a href="#districts" class="text-slate-400 hover:text-white transition-colors">Districts</a></li>
+        <li><a href="#places" class="text-slate-400 hover:text-white transition-colors">Places</a></li>
+        <li><a href="#stats" class="text-slate-400 hover:text-white transition-colors">Statistics</a></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-semibold text-white mb-4">About</h4>
+       <ul class="space-y-2">
+        <li><a href="#culture" class="text-slate-400 hover:text-white transition-colors">Culture</a></li>
+        <li><span class="text-slate-400">Tourism</span></li>
+        <li><span class="text-slate-400">Heritage</span></li>
+        <li><span class="text-slate-400">Landmarks</span></li>
+       </ul>
+      </div>
+     </div>
+     <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-slate-500 text-sm">© 2024 Haryana Districts Explorer. Made with ❤️</p>
+      <div class="flex items-center gap-4"><span class="text-slate-500 text-sm">जय जवान, जय किसान 🇮🇳</span>
+      </div>
+     </div>
+    </div>
+   </footer><!-- District Modal -->
+   <div id="district-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modal-backdrop"></div>
+    <div class="relative min-h-full flex items-center justify-center p-4">
+     <div id="modal-content" class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90%] overflow-auto"><!-- Modal content populated by JS -->
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Districts Data with Images (using public Wikimedia Commons URLs)
+    const districts = [
+      { 
+        name: "Ambala", division: "ambala", hq: "Ambala", population: "11.28 L", area: "1574 sq km", 
+        icon: "🏛️", famous: "Cantonment, Scientific Instruments", color: "#3b82f6",
+        image: "https://www.shutterstock.com/image-photo/ambala-haryana-19-may-2023-600nw-2306583355.jpg"
+      },
+      { 
+        name: "Bhiwani", division: "hisar", hq: "Bhiwani", population: "16.34 L", area: "4778 sq km", 
+        icon: "🤼", famous: "Wrestling Hub, Agriculture", color: "#ef4444",
+        image: "bhiwani.jpg.jpg"
+      },
+      { 
+        name: "Faridabad", division: "gurgaon", hq: "Faridabad", population: "18.09 L", area: "742 sq km", 
+        icon: "🏭", famous: "Industrial Hub, IT", color: "#10b981",
+        image: "faridabad.jpg"
+      },
+      { 
+        name: "Gurugram", division: "gurgaon", hq: "Gurugram", population: "15.14 L", area: "1253 sq km", 
+        icon: "🏢", famous: "Cyber City, IT Hub", color: "#06b6d4",
+        image: "gurugram.jpg"
+      },
+      { 
+        name: "Hisar", division: "hisar", hq: "Hisar", population: "17.43 L", area: "3983 sq km", 
+        icon: "🏫", famous: "Education Hub, Steel City", color: "#ec4899",
+        image: "hisar.jpg"
+      },
+      { 
+        name: "Karnal", division: "ambala", hq: "Karnal", population: "15.05 L", area: "2520 sq km", 
+        icon: "🌾", famous: "Rice Bowl, Dairy", color: "#22c55e",
+        image: "karnal.jpg"
+      },
+      { 
+        name: "Kurukshetra", division: "ambala", hq: "Kurukshetra", population: "9.64 L", area: "1530 sq km", 
+        icon: "⚔️", famous: "Mahabharata, Pilgrimage", color: "#a855f7",
+        image: "kurukshetra.jpg"
+      },
+      { 
+        name: "Panipat", division: "ambala", hq: "Panipat", population: "12.05 L", area: "1268 sq km", 
+        icon: "🧵", famous: "Textiles, Historic Battles", color: "#dc2626",
+        image: "panipat.jpg"
+      },
+      { 
+        name: "Rohtak", division: "rohtak", hq: "Rohtak", population: "10.61 L", area: "1745 sq km", 
+        icon: "🎓", famous: "Education, Medical", color: "#7c3aed",
+        image: "rohtak.jpg"
+      },
+      { 
+        name: "Sonipat", division: "rohtak", hq: "Sonipat", population: "14.50 L", area: "2122 sq km", 
+        icon: "🥋", famous: "Sports, Industries", color: "#be185d",
+        image:"sonipat.jpg"
+      },
+      { 
+        name: "Yamunanagar", division: "ambala", hq: "Yamunanagar", population: "12.14 L", area: "1768 sq km", 
+        icon: "🌊", famous: "Paper Mills", color: "#059669",
+        image: "yamunagar.jpg"
+      },
+      { 
+        name: "Panchkula", division: "ambala", hq: "Panchkula", population: "5.61 L", area: "898 sq km", 
+        icon: "🌲", famous: "Morni Hills, Planning", color: "#16a34a",
+        image: "panchkula.jpg"
+      },
+      { 
+        name: "Palwal", division: "gurgaon", hq: "Palwal", population: "10.42 L", area: "1359 sq km", 
+        icon: "🚂", famous: "Railway Junction", color: "#6366f1",
+        image: "palwal.jpg"
+      },
+      { 
+        name: "Jind", division: "hisar", hq: "Jind", population: "13.34 L", area: "2702 sq km", 
+        icon: "🛕", famous: "Temples, Agriculture", color: "#f97316",
+        image: "jind.jpg"
+      },
+      { 
+        name: "Rewari", division: "gurgaon", hq: "Rewari", population: "9.0 L", area: "1594 sq km", 
+        icon: "⚙️", famous: "Brass Work, Industries", color: "#0891b2",
+        image: "rewari.jpg"
+      },
+      { 
+        name: "Mahendragarh", division: "gurgaon", hq: "Narnaul", population: "9.22 L", area: "1899 sq km", 
+        icon: "🏰", famous: "Forts, Minerals", color: "#e11d48",
+        image: "mehandharghar.jpg"
+      },
+      { 
+        name: "Nuh", division: "gurgaon", hq: "Nuh", population: "10.89 L", area: "1507 sq km", 
+        icon: "🏔️", famous: "Aravalli Hills, Nature", color: "#0ea5e9",
+        image: "nuh.jpg"
+      },
+      { 
+        name: "Kaithal", division: "ambala", hq: "Kaithal", population: "10.74 L", area: "2317 sq km", 
+        icon: "📜", famous: "Historical Sites", color: "#14b8a6",
+        image: "kaithal.jpg"
+      },
+      { 
+        name: "Jhajjar", division: "rohtak", hq: "Jhajjar", population: "9.58 L", area: "1834 sq km", 
+        icon: "🌿", famous: "Handicrafts, Heritage", color: "#84cc16",
+        image: "jajjhar.jpg"
+      },
+      { 
+        name: "Fatehabad", division: "hisar", hq: "Fatehabad", population: "9.42 L", area: "2538 sq km", 
+        icon: "🌾", famous: "Cotton, Agriculture", color: "#f59e0b",
+        image: "fatehbad.jpg"
+      },
+      { 
+        name: "Sirsa", division: "hisar", hq: "Sirsa", population: "12.95 L", area: "4277 sq km", 
+        icon: "🌻", famous: "Cotton, Oilseeds", color: "#ca8a04",
+        image: "sirsa.jpg"
+      },
+      {
+        name: "Charkhi Dadri", division: "hisar", hq: "Charkhi Dadri", population: "5.02 L", area: "1370 sq km", 
+        icon: "⛏️", famous: "Mining, Agriculture", color: "#8b5cf6",
+        image: "chaki daddri.jpg"
+      },
+      { 
+        name: "Hansi", division: "hissar", hq: "hissar", population: "8.15 L", area: "1435 sq km", 
+        icon: "🌳", famous: "New District, Green Zone", color: "#059669",
+        image: "hansi.jpg"
+      }
+    ];
+
+    // Famous Places with Images
+    const places = [
+      { 
+        name: "Kurukshetra Sacred Site", 
+        district: "Kurukshetra", 
+        description: "Holy land of the Mahabharata war, pilgrimage destination",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Brahma_Sarovar_Kurukshetra.jpg/800px-Brahma_Sarovar_Kurukshetra.jpg",
+        type: "🛕 Temple"
+      },
+      { 
+        name: "Morni Hills", 
+        district: "Panchkula", 
+        description: "Scenic hill station with panoramic views and adventure",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Morni_Hills_Scenic_View.jpg/800px-Morni_Hills_Scenic_View.jpg",
+        type: "⛰️ Nature"
+      },
+      { 
+        name: "Badkhal Lake", 
+        district: "Faridabad", 
+        description: "Beautiful lake perfect for boating and water sports",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Badkhal_Lake_Faridabad.jpg/800px-Badkhal_Lake_Faridabad.jpg",
+        type: "💧 Lake"
+      },
+      { 
+        name: "Suraj Kund", 
+        district: "Faridabad", 
+        description: "Ancient reservoir with historical significance and annual fair",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Suraj_Kund_Ancient_Reservoir.jpg/800px-Suraj_Kund_Ancient_Reservoir.jpg",
+        type: "🏛️ Heritage"
+      },
+      { 
+        name: "Haryana Raj Bhavan", 
+        district: "Chandigarh", 
+        description: "Governor's residence showcasing modern architecture",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Chandigarh_Raj_Bhawan.jpg/800px-Chandigarh_Raj_Bhawan.jpg",
+        type: "🏢 Architecture"
+      },
+      { 
+        name: "Aravalli Sanctuary", 
+        district: "Nuh", 
+        description: "Protected forest area with diverse flora and fauna",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Aravalli_Wildlife_Sanctuary.jpg/800px-Aravalli_Wildlife_Sanctuary.jpg",
+        type: "🌿 Wildlife"
+      },
+      { 
+        name: "Karnal War Memorial", 
+        district: "Karnal", 
+        description: "Monument dedicated to soldiers and independence struggle",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Karnal_War_Memorial.jpg/800px-Karnal_War_Memorial.jpg",
+        type: "🏛️ Monument"
+      },
+      { 
+        name: "Panipat Textile Museum", 
+        district: "Panipat", 
+        description: "Museum showcasing textile heritage and famous battles",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Panipat_Textile_Heritage.jpg/800px-Panipat_Textile_Heritage.jpg",
+        type: "🏛️ Museum"
+      },
+      { 
+        name: "Yamuna River Ghats", 
+        district: "Yamunanagar", 
+        description: "Scenic riverside area with bathing ghats and temples",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Yamuna_River_Ghat.jpg/800px-Yamuna_River_Ghat.jpg",
+        type: "🌊 River"
+      },
+      { 
+        name: "Hisar Fort", 
+        district: "Hisar", 
+        description: "Ancient fort built by Feroz Shah Kotla, historical landmark",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Hisar_Fort_Ancient.jpg/800px-Hisar_Fort_Ancient.jpg",
+        type: "🏰 Fort"
+      },
+      { 
+        name: "Erath Nath Temple", 
+        district: "Kaithal", 
+        description: "Ancient temple with significant religious importance",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Erath_Nath_Temple_Kaithal.jpg/800px-Erath_Nath_Temple_Kaithal.jpg",
+        type: "🛕 Temple"
+      },
+      { 
+        name: "Narnaul Towers", 
+        district: "Mahendragarh", 
+        description: "Historic fortress towers with architectural brilliance",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Narnaul_Historic_Towers.jpg/800px-Narnaul_Historic_Towers.jpg",
+        type: "🏰 Heritage"
+      }
+    ];
+
+    // Default config
+    const defaultConfig = {
+      site_title: "Haryana Explorer",
+      hero_subtitle: "Explore stunning landmarks, vibrant culture, and the progressive spirit of India's prosperous northern state with breathtaking photographs.",
+      footer_text: "Discover the beauty, culture, and progress of Haryana through stunning photographs and detailed information.",
+      primary_color: "#1a365d",
+      secondary_color: "#f6ad55",
+      background_color: "#f8fafc",
+      text_color: "#334155",
+      accent_color: "#2c5282"
+    };
+
+    let config = { ...defaultConfig };
+
+    // Render districts grid with images
+    function renderDistricts(filter = 'all', search = '') {
+      const grid = document.getElementById('districts-grid');
+      const filtered = districts.filter(d => {
+        const matchesDivision = filter === 'all' || d.division === filter;
+        const matchesSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
+                             d.famous.toLowerCase().includes(search.toLowerCase());
+        return matchesDivision && matchesSearch;
+      });
+
+      grid.innerHTML = filtered.map((d, i) => `
+        <div class="district-card card-gradient rounded-xl shadow-lg overflow-hidden cursor-pointer border border-slate-100 fade-in" 
+             style="animation-delay: ${i * 0.05}s" data-district="${d.name}">
+          <div class="image-container relative">
+            <img src="${d.image}" alt="${d.name}" 
+                 loading="lazy" 
+                 onerror="console.error('District image failed:', this.src); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.parentElement.style.minHeight='200px';"
+                 style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="height: 2px; background: ${d.color}"></div>
+          </div>
+          <div class="p-5">
+            <div class="flex items-start justify-between mb-3">
+              <div class="text-3xl">${d.icon}</div>
+              <span class="px-2 py-1 rounded-full text-xs font-medium capitalize" 
+                    style="background: ${d.color}20; color: ${d.color}">
+                ${d.division}
+              </span>
+            </div>
+            <h3 class="heading-font text-lg font-bold mb-1" style="color: ${config.primary_color}">${d.name}</h3>
+            <p class="text-sm text-slate-600 mb-3">${d.famous}</p>
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <span>👥 ${d.population}</span>
+              <span>📍 ${d.area}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Add click handlers
+      grid.querySelectorAll('.district-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const district = districts.find(d => d.name === card.dataset.district);
+          showModal(district);
+        });
+      });
+    }
+
+    // Render famous places with images
+    function renderPlaces() {
+      const grid = document.getElementById('places-grid');
+      grid.innerHTML = places.map((place, i) => `
+        <div class="place-card card-gradient border border-slate-200 fade-in" style="animation-delay: ${i * 0.05}s">
+          <div class="relative overflow-hidden" style="height: 220px;">
+            <img src="${place.image}" alt="${place.name}" 
+                 loading="lazy"
+                 onerror="console.error('Place image failed:', this.src); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)';"
+                 class="place-image">
+            <div class="image-overlay"></div>
+            <div class="absolute top-3 right-3">
+              <span class="badge" style="background: ${config.secondary_color}40; color: ${config.secondary_color};">
+                ${place.type}
+              </span>
+            </div>
+          </div>
+          <div class="p-5">
+            <h3 class="heading-font text-lg font-bold mb-2" style="color: ${config.primary_color}">${place.name}</h3>
+            <p class="text-sm text-slate-600 mb-3">${place.description}</p>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-slate-500 uppercase">📍 ${place.district}</span>
+              <span class="text-xl">${place.type.split(' ')[0]}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Show district modal
+    function showModal(district) {
+      const modal = document.getElementById('district-modal');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <div class="relative h-64 overflow-hidden">
+          <img src="${district.image}" alt="${district.name}" 
+               loading="lazy"
+               onerror="console.error('Modal image failed:', this.src); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)';"
+               style="width: 100%; height: 100%; object-fit: cover;">
+          <button id="close-modal" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-colors shadow-lg">
+            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+          <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+            <div class="p-6 text-white">
+              <h2 class="heading-font text-3xl font-bold">${district.name}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="p-8">
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="px-3 py-1 rounded-full text-sm font-medium capitalize" 
+                  style="background: ${district.color}20; color: ${district.color}">
+              ${district.division} Division
+            </span>
+            <span class="px-3 py-1 rounded-full text-sm font-medium"
+                  style="background: #f0fdf4; color: #16a34a;">
+              📍 ${district.area}
+            </span>
+            <span class="px-3 py-1 rounded-full text-sm font-medium"
+                  style="background: #f0f4ff; color: #3b82f6;">
+              👥 ${district.population}
+            </span>
+          </div>
+          
+          <div class="grid sm:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div class="text-sm text-slate-500 mb-1">Headquarters</div>
+              <div class="font-semibold text-lg" style="color: ${config.primary_color}">${district.hq}</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div class="text-sm text-slate-500 mb-1">Famous For</div>
+              <div class="font-semibold" style="color: ${config.primary_color}">${district.famous}</div>
+            </div>
+          </div>
+          
+          <div class="p-4 rounded-xl border-l-4" style="background: ${district.color}10; border-color: ${district.color}">
+            <h4 class="font-semibold mb-2" style="color: ${district.color}">About ${district.name}</h4>
+            <p class="text-sm text-slate-700 leading-relaxed">
+              ${district.name} is one of the 22 districts of Haryana, located in the ${district.division} division. 
+              With its headquarters at ${district.hq}, the district covers an area of ${district.area} and has a 
+              population of approximately ${district.population}. It is particularly known for ${district.famous.toLowerCase()}.
+              This district plays a vital role in Haryana's overall development and economic growth.
+            </p>
+          </div>
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      
+      document.getElementById('close-modal').addEventListener('click', closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('district-modal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Search and filter handlers
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const filter = document.getElementById('division-filter').value;
+      renderDistricts(filter, e.target.value);
+    });
+
+    document.getElementById('division-filter').addEventListener('change', (e) => {
+      const search = document.getElementById('search-input').value;
+      renderDistricts(e.target.value, search);
+    });
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu on link click
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('mobile-menu').classList.add('hidden');
+      });
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.style.background = 'rgba(26, 54, 93, 0.98)';
+        navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+      } else {
+        navbar.style.background = 'rgba(26, 54, 93, 0.95)';
+        navbar.style.boxShadow = 'none';
+      }
+    });
+
+    // Apply config to UI
+    function applyConfig() {
+      document.getElementById('nav-title').textContent = config.site_title;
+      document.getElementById('hero-title').innerHTML = `Discover the Heart of <span style="color: ${config.secondary_color};">Haryana</span>`;
+      document.getElementById('hero-subtitle').textContent = config.hero_subtitle;
+      document.getElementById('footer-text').textContent = config.footer_text;
+    }
+
+    // Element SDK Integration
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = { ...defaultConfig, ...newConfig };
+          applyConfig();
+          renderDistricts();
+          renderPlaces();
+        },
+        mapToCapabilities: (cfg) => ({
+          recolorables: [
+            {
+              get: () => cfg.primary_color || defaultConfig.primary_color,
+              set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
+            },
+            {
+              get: () => cfg.secondary_color || defaultConfig.secondary_color,
+              set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
+            },
+            {
+              get: () => cfg.background_color || defaultConfig.background_color,
+              set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+            },
+            {
+              get: () => cfg.text_color || defaultConfig.text_color,
+              set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+            },
+            {
+              get: () => cfg.accent_color || defaultConfig.accent_color,
+              set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (cfg) => new Map([
+          ["site_title", cfg.site_title || defaultConfig.site_title],
+          ["hero_subtitle", cfg.hero_subtitle || defaultConfig.hero_subtitle],
+          ["footer_text", cfg.footer_text || defaultConfig.footer_text]
+        ])
+      });
+    }
+
+    // Initialize
+    renderDistricts();
+    renderPlaces();
+    applyConfig();
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d0b285357649788',t:'MTc3MTU2MDY2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
